@@ -1,100 +1,99 @@
-# VerificarSite — Consulta de informações sobre sites
+# VerificarSite
 
-Aplicação web construída com **Python, Flask e Selenium** para consultar informações sobre uma URL em um serviço externo e exibir o resultado em uma interface simples.
+**Consulta experimental de informações sobre sites · Python · Flask · Selenium**
 
-> **Importante:** esta aplicação não realiza uma auditoria independente de segurança nem garante que um site seja confiável. As informações vêm de um serviço de terceiros e podem estar indisponíveis ou desatualizadas.
+[![Python checks](https://github.com/DanielHSec/VerificarSite/actions/workflows/python-checks.yml/badge.svg)](https://github.com/DanielHSec/VerificarSite/actions/workflows/python-checks.yml)
+[![MIT License](https://img.shields.io/badge/License-MIT-bd97ff.svg)](LICENSE)
 
-## Tecnologias
+Aplicação web local que envia uma URL pública ao serviço de terceiros [Site Confiável](https://www.siteconfiavel.com.br/) usando automação do Google Chrome e exibe as informações retornadas. Interface redesenhada em preto/violeta e tratamento de falhas mais claro.
 
-- **Python** — lógica e execução da aplicação.
-- **Flask** — servidor web local e renderização da interface.
-- **Selenium + Google Chrome** — automação de navegador e consulta ao serviço.
-- **HTML e CSS** — formulário e exibição dos resultados.
+> **Atenção:** o projeto **não** executa auditoria de segurança, scanner antimalware ou certificação de confiabilidade. Dados externos podem estar errados, indisponíveis ou desatualizados. **Não use como única fonte para decidir se um endereço é seguro.**
 
-## Como funciona
+## Recursos
 
-1. O usuário informa uma URL na interface local.
-2. O servidor Flask inicia o Chrome com Selenium.
-3. O navegador automatizado acessa o serviço externo `siteconfiavel.com.br` e envia a URL.
-4. A aplicação tenta extrair o texto apresentado e exibi-lo na página.
+- Formulário responsivo com validação básica de URLs públicas HTTP/HTTPS.
+- Bloqueio de entradas com credenciais, esquemas perigosos e endereços internos/reservados.
+- Esperas condicionais do Selenium (sem pausa fixa de 10 segundos) e mensagens de erro amigáveis.
+- Chrome iniciado apenas durante a consulta; encerramento do driver mesmo em falhas.
+- Servidor Flask vinculado a `127.0.0.1` por padrão, sem exposição automática na rede.
+- Testes offline de validação de URLs via `unittest` e workflow de checagem no GitHub.
 
-O projeto depende da estrutura HTML desse serviço externo. **Mudanças na página podem quebrar a consulta**, mesmo que o servidor Flask continue funcionando.
+## Instalação
 
-## Executar localmente
-
-### 1. Pré-requisitos
-
-- Python 3 instalado.
-- Google Chrome instalado.
-- Acesso à Internet para a consulta externa.
-- Um ChromeDriver compatível com o Chrome, quando a configuração do Selenium exigir um driver disponível localmente.
-
-### 2. Clonar o repositório
+Requer **Python 3.10+**, **Google Chrome** e acesso à Internet. A instalação atual do Selenium pode gerenciar o driver compatível automaticamente; em alguns ambientes é necessário configurá-lo.
 
 ```bash
 git clone https://github.com/DanielHSec/VerificarSite.git
 cd VerificarSite
+python -m venv .venv
 ```
 
-### 3. Criar ambiente virtual
-
-**Windows (PowerShell):**
+**Windows (PowerShell)**
 
 ```powershell
-py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-```
-
-**Linux/macOS:**
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-```
-
-### 4. Iniciar
-
-```bash
 python app.py
 ```
 
-Depois, acesse **http://localhost:5000** e informe uma URL para consulta.
+**Linux/macOS**
 
-O servidor atual usa `0.0.0.0:5000`, o que pode disponibilizar a aplicação na rede local. **Use apenas em ambiente de desenvolvimento confiável; não publique essa versão diretamente na Internet.**
+```bash
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python app.py
+```
 
-## Estrutura do projeto
+Abra **http://127.0.0.1:5000**.
+
+### Opções de ambiente
+
+| Variável | Padrão | Finalidade |
+| :--- | :--- | :--- |
+| `VERIFICARSITE_HOST` | `127.0.0.1` | Interface de escuta do Flask. Evite `0.0.0.0` fora de rede confiável. |
+| `VERIFICARSITE_PORT` | `5000` | Porta HTTP local. |
+| `VERIFICARSITE_HEADLESS` | `0` | Use `1` para tentar o Chrome sem janela gráfica. |
+
+## Como funciona
+
+1. A aplicação normaliza e verifica sintaticamente a URL informada.
+2. O Selenium abre exclusivamente o serviço externo de consulta.
+3. A URL é enviada ao formulário do serviço de terceiros, que realiza o processamento.
+4. O conteúdo textual da página de resultado é exibido ao usuário.
+
+**Privacidade:** não envie URLs com tokens, caminhos privados ou dados confidenciais. A URL é compartilhada com o serviço externo. A validação local é uma proteção básica e não identifica phishing ou malware.
+
+## Testes e qualidade
+
+```bash
+python -m unittest discover -s tests -v
+python -m compileall -q app.py url_validation.py tests
+```
+
+O workflow `.github/workflows/python-checks.yml` automatiza essas verificações em pushes e pull requests. Esses testes **não** acessam nem homologam o serviço externo.
+
+## Organização
 
 ```text
-VerificarSite/
-├── app.py                 # Aplicação Flask + automação Selenium
-├── requirements.txt       # Dependências Python instaláveis
-├── requiriments.txt       # Arquivo legado; prefira requirements.txt
-├── templates/
-│   └── index.html         # Formulário e apresentação do resultado
-└── static/
-    └── style.css          # Estilização
+app.py                         Flask e integração Selenium
+url_validation.py              Normalização e restrições básicas de URL
+templates/index.html           Interface acessível em português
+static/style.css               Tema responsivo preto/violeta
+tests/test_url_validation.py   Testes independentes da rede
+.github/workflows/             Verificações automatizadas
+requirements.txt               Dependências
 ```
 
 ## Limitações conhecidas
 
-- A aplicação consulta **um serviço de terceiros**, sem garantia de disponibilidade, precisão ou permanência da interface.
-- A extração usa um caminho XPath específico e uma espera fixa; por isso, podem ocorrer resultados vazios ou erros.
-- O tempo de resposta depende do navegador, da rede e do serviço consultado.
-- O projeto não fornece API pública, análise de malware, varredura de vulnerabilidades nem classificação verificável de risco.
-- URLs maliciosas devem ser avaliadas com cuidado; **não use o resultado como única base para decidir se um endereço é seguro**.
-
-## Possíveis melhorias
-
-- Validar e normalizar a URL informada.
-- Tratar tempo limite, falhas da consulta e mudanças no HTML com mensagens específicas.
-- Substituir a espera fixa por condições explícitas do Selenium.
-- Criar testes automatizados de componentes independentes do serviço externo.
-- Separar automação, lógica e interface em módulos menores.
+- O serviço consultado é externo e sua estrutura HTML pode mudar sem aviso.
+- A disponibilidade do Chrome e da rede afeta o resultado.
+- Alguns sites e provedores bloqueiam automação.
+- Não há histórico persistido, API pública, autenticação ou garantia de resultado.
+- O servidor Flask embutido é para desenvolvimento, não para publicação direta na Internet.
 
 ## Autor
 
-Desenvolvido por **Daniel Abreu**.
+**Daniel Abreu** · [Portfólio](https://daniel-abreu.vercel.app/) · [GitHub](https://github.com/DanielHSec)
 
-[GitHub](https://github.com/DanielHSec) · [Portfólio](https://daniel-abreu.vercel.app/) · [LinkedIn](https://www.linkedin.com/in/danielhenrique-cybersecurity/)
+Licença: [MIT](LICENSE) (mantido o aviso de direitos autorais original).

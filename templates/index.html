@@ -2,22 +2,71 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Verificador de Confiabilidade de Sites</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090611">
+    <meta name="description" content="Consulta experimental de informações sobre sites usando Python, Flask e Selenium.">
+    <title>VerificarSite · Consulta experimental</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
   </head>
   <body>
-    <div class="container">
-      <h1>Verificador de Confiabilidade de Sites</h1>
-      <form method="post" action="/">
-        <label for="url">Insira o URL do site:</label>
-        <input type="text" id="url" name="url" required>
-        <button type="submit">Buscar Confiabilidade</button>
-      </form>
-      {% if resultado %}
-      <h2>Resultado:</h2>
-      <pre>{{ resultado }}</pre>
-      {% endif %}
-    </div>
+    <main class="shell">
+      <header class="site-header">
+        <a class="brand" href="{{ url_for('index') }}" aria-label="VerificarSite, página inicial">
+          <span class="brand-mark" aria-hidden="true">V</span>
+          <span>Verificar<span class="accent">Site</span></span>
+        </a>
+        <span class="status">Projeto experimental</span>
+      </header>
+
+      <section class="intro" aria-labelledby="headline">
+        <p class="eyebrow">PYTHON <span>·</span> FLASK <span>·</span> SELENIUM</p>
+        <h1 id="headline">Investigue informações sobre um <span>site.</span></h1>
+        <p class="lead">Informe um endereço e consulte os dados disponibilizados por um serviço externo — com clareza sobre o que o resultado realmente significa.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="form-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">01 / CONSULTA</p>
+            <h2 id="form-heading">Endereço do site</h2>
+          </div>
+          <span class="panel-icon" aria-hidden="true">↗</span>
+        </div>
+
+        <form method="post" action="{{ url_for('index') }}">
+          <label for="url">URL pública (HTTP ou HTTPS)</label>
+          <div class="input-row">
+            <input id="url" name="url" type="text" inputmode="url" autocomplete="url" maxlength="2048" placeholder="exemplo.com.br" value="{{ url }}" required aria-describedby="privacy-notice">
+            <button type="submit">Consultar <span aria-hidden="true">→</span></button>
+          </div>
+          <p class="field-hint" id="privacy-notice">A URL informada é enviada para <strong>siteconfiavel.com.br</strong>. Não insira links internos, privados ou com tokens.</p>
+        </form>
+
+        {% if erro %}
+          <div class="notice notice-error" role="alert">
+            <strong>Não foi possível consultar.</strong>
+            <p>{{ erro }}</p>
+          </div>
+        {% endif %}
+
+        {% if resultado %}
+          <div class="result" aria-live="polite">
+            <p class="eyebrow">02 / RESULTADO DO SERVIÇO EXTERNO</p>
+            <h2>Informações retornadas</h2>
+            <pre>{{ resultado }}</pre>
+          </div>
+        {% endif %}
+      </section>
+
+      <aside class="disclaimer" aria-label="Limitações importantes">
+        <span class="disclaimer-icon" aria-hidden="true">i</span>
+        <p><strong>Importante:</strong> esta ferramenta não examina o código do site nem certifica segurança. Os dados vêm de um terceiro e podem estar incorretos, incompletos ou indisponíveis. Nunca use o resultado como única referência para decidir se um link é seguro.</p>
+      </aside>
+
+      <footer>
+        <span>VerificarSite · Projeto de estudo</span>
+        <a href="https://github.com/DanielHSec/VerificarSite" rel="noopener noreferrer">Ver código no GitHub ↗</a>
+      </footer>
+    </main>
   </body>
 </html>
