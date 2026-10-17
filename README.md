@@ -94,6 +94,6 @@ requirements.txt               Dependências
 
 ## Autor
 
-**Daniel Abreu** · [Portfólio](https://www.danielhabreu.dev/) · [GitHub](https://github.com/DanielHSec)
+**Daniel Abreu** · [Portfólio](https://www.danielhabreu.dev/) · [GitHub](https://github.com/DanielHSec) · [Contato](mailto:contato@danielhabreu.dev)
 
 Licença: [MIT](LICENSE) (mantido o aviso de direitos autorais original).
